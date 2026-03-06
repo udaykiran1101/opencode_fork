@@ -3,6 +3,8 @@ import path from "path"
 import { createEffect, createMemo, onMount } from "solid-js"
 import { createSimpleContext } from "./helper"
 import { Glob } from "../../../../util/glob"
+import ALN from "./theme/ALN.json" with {type: "json"}
+import ALN2 from "./theme/ALN2.json" with {type: "json"}
 import aura from "./theme/aura.json" with { type: "json" }
 import ayu from "./theme/ayu.json" with { type: "json" }
 import catppuccin from "./theme/catppuccin.json" with { type: "json" }
@@ -139,6 +141,8 @@ type ThemeJson = {
 }
 
 export const DEFAULT_THEMES: Record<string, ThemeJson> = {
+  ALN,
+  ALN2,
   aura,
   ayu,
   catppuccin,

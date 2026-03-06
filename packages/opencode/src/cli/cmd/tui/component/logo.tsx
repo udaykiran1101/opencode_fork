@@ -1,7 +1,7 @@
-import { TextAttributes, RGBA } from "@opentui/core"
 import { For, type JSX } from "solid-js"
 import { useTheme, tint } from "@tui/context/theme"
 import { logo, marks } from "@/cli/logo"
+import { TextAttributes, RGBA} from "@opentui/core"
 
 // Shadow markers (rendered chars in parens):
 // _ = full shadow cell (space with bg=shadow)
@@ -75,8 +75,8 @@ export function Logo() {
       <For each={logo.left}>
         {(line, index) => (
           <box flexDirection="row" gap={1}>
-            <box flexDirection="row">{renderLine(line, theme.textMuted, false)}</box>
-            <box flexDirection="row">{renderLine(logo.right[index()], theme.text, true)}</box>
+            <box flexDirection="row">{renderLine(line, theme.primary, false)}</box>
+            <box flexDirection="row">{renderLine(logo.right[index()] ?? "", theme.textMuted, true)}</box>
           </box>
         )}
       </For>
