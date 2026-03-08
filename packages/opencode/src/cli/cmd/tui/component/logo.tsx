@@ -1,70 +1,64 @@
 import { For, type JSX } from "solid-js"
 import { useTheme, tint } from "@tui/context/theme"
 import { logo, marks } from "@/cli/logo"
-import { TextAttributes, RGBA} from "@opentui/core"
+import { TextAttributes } from "@opentui/core"
 
-// Shadow markers (rendered chars in parens):
-// _ = full shadow cell (space with bg=shadow)
-// ^ = letter top, shadow bottom (▀ with fg=letter, bg=shadow)
-// ~ = shadow top only (▀ with fg=shadow)
 const SHADOW_MARKER = new RegExp(`[${marks}]`)
 
 export function Logo() {
   const { theme } = useTheme()
 
-  const renderLine = (line: string, fg: RGBA, bold: boolean): JSX.Element[] => {
-    const shadow = tint(theme.background, fg, 0.25)
+  // Edge colours updated to match your requested mapping
+  const leftColor = "#39BAE6"   // Blue
+  const rightColor = "#95C11F"  // Green
+  const bottomColor = "#D2A6FF" // Purple
+
+  const renderLine = (line: string, row: number, bold: boolean): JSX.Element[] => {
     const attrs = bold ? TextAttributes.BOLD : undefined
     const elements: JSX.Element[] = []
-    let i = 0
 
-    while (i < line.length) {
-      const rest = line.slice(i)
-      const markerIndex = rest.search(SHADOW_MARKER)
+    const trimmed = line.trimEnd()
+    const first = trimmed.search(/\S/)
+    const last = trimmed.length - 1
 
-      if (markerIndex === -1) {
-        elements.push(
-          <text fg={fg} attributes={attrs} selectable={false}>
-            {rest}
-          </text>,
-        )
-        break
+    const gaps: number[] = []
+    for (let i = first; i <= last; i++) {
+      if (trimmed[i] === " ") gaps.push(i)
+    }
+
+    const gap1 = gaps[0] ?? -1
+    const gap2 = gaps[gaps.length - 1] ?? -1
+
+    const height = logo.left.length
+
+    for (let col = 0; col < line.length; col++) {
+      const ch = line[col]
+
+      if (ch === " ") {
+        elements.push(<text selectable={false}> </text>)
+        continue
       }
 
-      if (markerIndex > 0) {
-        elements.push(
-          <text fg={fg} attributes={attrs} selectable={false}>
-            {rest.slice(0, markerIndex)}
-          </text>,
-        )
+      let color
+
+      // Left beam: the first block of characters before the first space
+      if (col < gap1) {
+        color = leftColor
+      }
+      // Bottom beam: encompasses the very bottom solid rows, AND the inner top-facing section
+      else if (row > height * 0.72 || (col > gap1 && col < gap2)) {
+        color = bottomColor
+      }
+      // Right beam: everything else (typically the block after the last space, and the top tip)
+      else {
+        color = rightColor
       }
 
-      const marker = rest[markerIndex]
-      switch (marker) {
-        case "_":
-          elements.push(
-            <text fg={fg} bg={shadow} attributes={attrs} selectable={false}>
-              {" "}
-            </text>,
-          )
-          break
-        case "^":
-          elements.push(
-            <text fg={fg} bg={shadow} attributes={attrs} selectable={false}>
-              ▀
-            </text>,
-          )
-          break
-        case "~":
-          elements.push(
-            <text fg={shadow} attributes={attrs} selectable={false}>
-              ▀
-            </text>,
-          )
-          break
-      }
-
-      i += markerIndex + 1
+      elements.push(
+        <text fg={color} attributes={attrs} selectable={false}>
+          {ch}
+        </text>
+      )
     }
 
     return elements
@@ -75,8 +69,10 @@ export function Logo() {
       <For each={logo.left}>
         {(line, index) => (
           <box flexDirection="row" gap={1}>
-            <box flexDirection="row">{renderLine(line, theme.primary, false)}</box>
-            <box flexDirection="row">{renderLine(logo.right[index()] ?? "", theme.textMuted, true)}</box>
+            <box flexDirection="row">{renderLine(line, index(), false)}</box>
+            <box flexDirection="row">
+              {renderLine(logo.right[index()] ?? "", index(), true)}
+            </box>
           </box>
         )}
       </For>
